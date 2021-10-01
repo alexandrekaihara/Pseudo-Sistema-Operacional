@@ -2,6 +2,8 @@
 # Author: Alexandre Kaihara and Pedro
 
 
+from variaveisglobais import *
+
 
 '''
 1.2 Estrutura de Memória
@@ -26,6 +28,7 @@ OBS:
 class MemoryManager():
     # Brief: 
     #   Starts all variables and strutures of the memory
+    #   OBS: All methods that share variables, must use locks
     # Param:
     #   processID: Integer representing the process ID
     #   filename: String containing the filename
@@ -41,11 +44,11 @@ class MemoryManager():
     #   processID: Integer representing the process ID
     #   size: Process size to the accupied
     # Return: 
-    #   If there is no free memory available, return NOT_ENOUGH_RAM_MEMORY
+    #   If there is no free memory available, return NOT_ENOUGH_RAM_MEMORY, else, 
     #   Else return 0
     def load(self, processID: int, size: int) -> int:
         '''Implementar'''
-        return 0
+        return MEMORY_ALLOCATION_SUCESS
 
     # Brief: 
     #   Remove from memory

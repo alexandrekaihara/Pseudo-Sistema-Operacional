@@ -78,6 +78,7 @@ class Process():
 class ProcessManager():
     # Brief: 
     #   Defines the structure of the processes
+    #   OBS: All methods which share some variable, must use locks
     # Param:
     # Return: 
     #   None

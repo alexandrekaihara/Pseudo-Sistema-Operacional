@@ -19,11 +19,11 @@ class PseudoOS():
     # Param:
     # Return: 
     def __init__(self, process_path: str, memory_path: str) -> None:
-        self.ArcM = ArchiveManager(memory_path)
-        self.MemM = MemoryManager()
-        self.ProM = ProcessManager()
-        self.QueM = QueueManager()
-        self.ResM = ResourceManager()
+        self.ArchiveMan = ArchiveManager(memory_path)
+        self.MemoryMan = MemoryManager()
+        self.ProcessMan = ProcessManager()
+        self.QueueMan = QueueManager()
+        self.ResourcesMan = ResourceManager()
         self.processes = []
         self.read_processes(process_path)
         self.current_time = datetime.now()
@@ -44,13 +44,13 @@ class PseudoOS():
             sleep(wait)
             
             # Create process if possible
-            id = self.ProM.get_next_process_id()
-            code = self.MemM.load(id, p[3])
+            id = self.ProcessMan.get_next_process_id()
+            code = self.MemoryMan.load(id, p[3])
             if code != NOT_ENOUGH_RAM_MEMORY:
-                id = self.ProM.create(p[1], p[2], p[3], p[4], p[5], p[6], p[7])
+                id = self.ProcessMan.create(p[1], p[2], p[3], p[4], p[5], p[6], p[7])
 
             # Insert on queue to be executed
-            self.QueM.insert(id, p[1])
+            self.QueueMan.insert(id, p[1])
 
     # Brief: 
     #   Thread for defining the next process to be executed
@@ -59,28 +59,29 @@ class PseudoOS():
     def scheduler(self) -> None:
         while True:
             # Reinsert blocked processess into the ready queue
-            [self.QueM.insert(id, priority) for (id, priority) in self.ResM.get_buffer()]
+            [self.QueueMan.insert(id, priority) for (id, priority) in self.ResourcesMan.get_buffer()]
 
             # Check which is the next process to be run
-            id = self.QueM.next_process()
+            id = self.QueueMan.next_process()
             # If there is next process
             if id != NO_NEXT_PROCESS:
-                self.QueM.remove(id)
-                pr = self.ProM.get_process(id)
+                # As this process will be executed, must leave the ready queue
+                self.QueueMan.remove(id)
+                pr = self.ProcessMan.get_process(id)
 
                 # Execute till the end if is a real time process, else, execute a quantum
                 end = [0]
                 if pr.priority == 0:
-                    resourcecode = pr.run(pr.processor_time, self.ArcM, end)
+                    resourcecode = pr.run(pr.processor_time, self.ArchiveMan, end)
                 else:
-                    resourcecode = pr.run(self.quantum, self.ArcM, end)
+                    resourcecode = pr.run(self.quantum, self.ArchiveMan, end)
                 
                 # If the process has finished, so it has to free the memory occupied by the process
                 if end[0] == PROCESS_FINISHED:
-                    self.MemM.remove(id, pr.mem_allocated)
+                    self.MemoryMan.remove(id, pr.mem_allocated)
                 # If the running process not requested a resource, must get back to the ready queue, else, it must create a request
                 elif resourcecode == NO_RESOURCE_REQUEST:
-                    self.QueM.insert(id, pr.priority)
+                    self.QueueMan.insert(id, pr.priority)
                 else:
                     t = threading.Thread(target=self.resource_request, args=(resourcecode, id, pr.priority))
                     t.start()
@@ -98,13 +99,13 @@ class PseudoOS():
     #   None
     def resource_request(self, code: int, processID: int, priority: int) -> None:
         if code == SCANNER_RESOURCE_REQUESTED:
-            self.ResM.get_scanner(processID, priority)
+            self.ResourcesMan.get_scanner(processID, priority)
         elif code == PRINTER_RESOURCE_REQUESTED:
-            self.ResM.get_printer(processID, priority)
+            self.ResourcesMan.get_printer(processID, priority)
         elif code == MODEM_RESOURCE_REQUESTED:
-            self.ResM.get_modem(processID, priority)
+            self.ResourcesMan.get_modem(processID, priority)
         elif code == SATA_RESOURCE_REQUESTED:
-            self.ResM.get_sata(processID, priority)
+            self.ResourcesMan.get_sata(processID, priority)
 
     # Brief: 
     #   Read the processes file
