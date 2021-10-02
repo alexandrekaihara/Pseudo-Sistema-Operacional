@@ -3,6 +3,8 @@
 
 from variaveisglobais import *
 
+from queue import Queue
+
 '''
 O programa deve ter duas filas de prioridades distintas: a fila de processos de tempo real e a fila de
 processos de usuários. Processos de tempo real entram para a fila de maior prioridade, sendo gerenciados
@@ -28,8 +30,10 @@ class QueueManager():
     # Return: 
     #   None
     def __init__(self):
-        '''Implementation'''
-        pass
+        self.real_time  = Queue(); # FIFO 0
+        self.user_1     = Queue () # Priority 1
+        self.user_2     = Queue (); # Priority 2
+        self.user_3     = Queue (); # Priority 3
 
     # Brief: 
     #   Insert new process on the queue according to the priority
@@ -40,8 +44,14 @@ class QueueManager():
     #   None
     def insert(self, processID: int, priority: int) -> None:
         print("Inserted process", processID, "with priority", priority, "\n")
-        '''Implementation'''
-        pass
+        if(priority == 1):
+            self.user_1.put(processID)
+        elif(priority == 2):
+            self.user_2.put(processID)
+        elif(priority == 3):
+            self.user_3.put(processID)
+        else:
+            self.real_time.put(processID)
 
     # Brief: 
     #   Remove a process from the queue by its ID
@@ -51,6 +61,7 @@ class QueueManager():
     def remove(self, processID: int) -> None:
         '''Implementation'''
         pass
+     
 
     # Brief: 
     #   Remove a process from the queue and send it to be executed
@@ -58,5 +69,12 @@ class QueueManager():
     # Return: 
     #   Returns the integer that identify the next process to be executed, if there is no next process, return NO_NEXT_PROCESS
     def next_process(self) -> int:
-        '''Implementation'''
+        if(not self.real_time.empty):
+            return self.real_time.get()
+        if(not self.user_1.empty):
+            return self.user_1.get()
+        if(not self.user_2.empty):
+            return self.user_2.get()
+        if(not self.user_3.empty):
+            return self.user_3.get()
         return NO_NEXT_PROCESS
