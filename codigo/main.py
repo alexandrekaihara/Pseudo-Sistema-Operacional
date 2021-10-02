@@ -1,15 +1,16 @@
 # Brief: Mainscript which starts the pseudo SO 
 # Author: Alexandre Kaihara and Pedro
+# python main.py input/test/processes.txt input/test/files.txt
 
-import sys
-import threading
+from sys import argv
+from threading import Thread
 from variaveisglobais import *
 from arquivo import ArchiveManager
 from memoria import MemoryManager
 from processos import ProcessManager
 from recurso import ResourceManager
 from fila import QueueManager
-from datetime import date, datetime
+from datetime import datetime
 from time import sleep
 
 
@@ -44,10 +45,11 @@ class PseudoOS():
             sleep(wait)
             
             # Create process if possible
+            offset = [0]
             id = self.ProcessMan.get_next_process_id()
-            code = self.MemoryMan.load(id, p[3])
+            code = self.MemoryMan.load(id, p[3], offset)
             if code != NOT_ENOUGH_RAM_MEMORY:
-                id = self.ProcessMan.create(p[1], p[2], p[3], p[4], p[5], p[6], p[7])
+                id = self.ProcessMan.create(p[1], p[2], p[3], p[4], p[5], p[6], p[7], offset[0])
 
             # Insert on queue to be executed
             self.QueueMan.insert(id, p[1])
@@ -56,7 +58,7 @@ class PseudoOS():
     #   Thread for defining the next process to be executed
     # Param:
     # Return: 
-    def scheduler(self) -> None:
+    def run(self) -> None:
         while True:
             # Reinsert blocked processess into the ready queue
             [self.QueueMan.insert(id, priority) for (id, priority) in self.ResourcesMan.get_buffer()]
@@ -70,23 +72,23 @@ class PseudoOS():
                 pr = self.ProcessMan.get_process(id)
 
                 # Execute till the end if is a real time process, else, execute a quantum
-                end = [0]
                 if pr.priority == 0:
-                    resourcecode = pr.run(pr.processor_time, self.ArchiveMan, end)
+                    code = pr.run(pr.processor_time, self.ArchiveMan)
                 else:
-                    resourcecode = pr.run(self.quantum, self.ArchiveMan, end)
+                    code = pr.run(self.quantum, self.ArchiveMan)
                 
                 # If the process has finished, so it has to free the memory occupied by the process
-                if end[0] == PROCESS_FINISHED:
+                if code == PROCESS_FINISHED:
                     self.MemoryMan.remove(id, pr.mem_allocated)
+                    self.ProcessMan.delete(id)
                 # If the running process not requested a resource, must get back to the ready queue, else, it must create a request
-                elif resourcecode == NO_RESOURCE_REQUEST:
+                elif code == NO_RESOURCE_REQUEST:
                     self.QueueMan.insert(id, pr.priority)
                 else:
-                    t = threading.Thread(target=self.resource_request, args=(resourcecode, id, pr.priority))
+                    t = Thread(target=self.resource_request, args=(code, id, pr.priority))
                     t.start()
             # If there is no more next processes and no more processes to be created, and no
-            elif len(self.processes) == 0:
+            elif self.ProcessMan.num_active_processes() == 0:
                 break
 
     # Brief: 
@@ -128,20 +130,21 @@ class PseudoOS():
 
 def main():
     try:
-        sys.argv[1]
-        sys.argv[2]
+        argv[1]
+        argv[2]
     except:
         print("To start the operational system, type the path to the processes file (PFILE) and the memory file (MFILE) as follows:\npython main.py [PFILE] [MFILE]")
         return 0
-    os = PseudoOS(sys.argv[1], sys.argv[2])
+    os = PseudoOS(argv[1], argv[2])
     
     threads = []
-    threads.append(threading.Thread(target=os.create_processes))
-    threads.append(threading.Thread(target=os.scheduler))
+    threads.append(Thread(target=os.create_processes))
+    threads.append(Thread(target=os.run))
+
 
     [thread.start() for thread in threads]
-    [thread.join() for thread in threads]
-
+    [thread.join() for thread in threads]        
+    print("** Ending execution of Pseudo Operational System")
 
 if __name__ == "__main__":
     main()

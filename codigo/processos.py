@@ -24,13 +24,14 @@ class Process():
     #   scanner: If there is a requisition on the scanner
     #   modem = If there is a requisition on the modem
     #   driver: If there is a requisition on the driver
+    #   offset: offset on RAM memory allocated for the process
     # Return: 
     #   None
-    def __init__(self, processID: int, priority: int, processor_time: int, mem_allocated: int, printer: bool, scanner: bool, modem: bool, driver: bool) -> None:
+    def __init__(self, processID: int, priority: int, processor_time: int, mem_allocated: int, printer: bool, scanner: bool, modem: bool, driver: bool, offset: int) -> None:
         self.processID = processID
         self.priority = priority
         self.processor_time = processor_time
-        self.offset = 0
+        self.offset = offset
         self.mem_allocated = mem_allocated
         self.printer = printer
         self.scanner = scanner
@@ -45,16 +46,16 @@ class Process():
     # Param:
     #   time = number of seconds to be executed
     #   ArchiveM: Instance of the Archive Manager to access directly the archives
-    #   end: Contains one element which has a code that indicates if the process has finished (PROCESS_FINISHED) or not
     # Return: 
-    #   Return the code if it requested a resource () or not
-    def run(self, time: int, ArchiveM: ArchiveManager, end: list) -> int:
+    #   Return the code if the process ended (PROCESS_FINISHED) or not requested a resource (NO_RESOURCE_REQUEST) or 
+    #   if it needs a resouce, so it should return some of these codes SCANNER_RESOURCE_REQUESTED, PRINTER_RESOURCE_REQUESTED, MODEM_RESOURCE_REQUESTED, SATA_RESOURCE_REQUESTED
+    def run(self, time: int, ArchiveM: ArchiveManager) -> int:
         print("process ", self.processID, " =>")
         print("P", self.processID, " STARTED")
 
         '''Implementar'''
         
-        return NO_RESOURCE_REQUEST       
+        return PROCESS_FINISHED       
         print("P", self.processID, " return SIGINT")
 
     # Brief: 
@@ -93,14 +94,15 @@ class ProcessManager():
     #   priority: Priority of the process
     #   processor_time: Processor time required to execute the whole process
     #   mem_allocated: Total amouunt of memory needed to store all program
-    #   printer: If there is a requisition on the printer
+    #   printer: Code of the requested printer
     #   scanner: If there is a requisition on the scanner
-    #   driver: If there is a requisition on the driver
+    #   driver: Code of the requested driver
+    #   offet: offset of the RAM memory in which the process was allocated
     # Return: 
     #   return id of the new process
-    def create(self, priority: int, processor_time: int, offset: int, mem_allocated: int, printer: bool, scanner: bool, driver: bool) -> int:
+    def create(self, priority: int, processor_time: int, mem_allocated: int, printer: int, scanner: bool, modem: bool, driver: int, offset: int) -> int:
         new_id = self.last_given_id + 1
-        self.__processes[new_id] = Process(new_id, priority, processor_time, offset, mem_allocated, printer, scanner, driver)
+        self.__processes[new_id] = Process(new_id, priority, processor_time, mem_allocated, printer, scanner, modem, driver, offset)
         self.last_given_id = new_id
         return new_id
 
@@ -111,6 +113,7 @@ class ProcessManager():
     # Return: 
     #   None
     def delete(self, processID: int) -> None:
+        print("Deleted process with id", processID)
         self.__processes.pop(processID)
 
     # Brief: 
@@ -130,4 +133,10 @@ class ProcessManager():
     def get_next_process_id(self) -> int:
         return self.last_given_id + 1
     
-
+    # Brief: 
+    #   Returns the number of active processes
+    # Param:
+    # Return: 
+    #   Return the next id to be given
+    def num_active_processes(self):
+        return len(self.__processes)

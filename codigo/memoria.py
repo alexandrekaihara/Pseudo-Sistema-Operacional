@@ -43,10 +43,11 @@ class MemoryManager():
     # Param:
     #   processID: Integer representing the process ID
     #   size: Process size to the accupied
+    #   offset: At the end of execution, should set this variable with the offset given to the allocated process
     # Return: 
     #   If there is no free memory available, return NOT_ENOUGH_RAM_MEMORY, else, 
     #   Else return 0
-    def load(self, processID: int, size: int) -> int:
+    def load(self, processID: int, size: int, offset: list) -> int:
         '''Implementar'''
         return MEMORY_ALLOCATION_SUCESS
 
