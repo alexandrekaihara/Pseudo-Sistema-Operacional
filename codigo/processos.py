@@ -5,6 +5,8 @@
 from typing import Tuple
 from variaveisglobais import *
 from arquivo import ArchiveManager
+from datetime import datetime
+from time import sleep
 
 '''
 Módulo de Processos – classes e estruturas de dados relativas ao processo. Basicamente,
@@ -25,20 +27,31 @@ class Process():
     #   modem = If there is a requisition on the modem
     #   driver: If there is a requisition on the driver
     #   offset: offset on RAM memory allocated for the process
+    #   archive_op = a list of all archive operations to be executed
     # Return: 
     #   None
-    def __init__(self, processID: int, priority: int, processor_time: int, mem_allocated: int, printer: bool, scanner: bool, modem: bool, driver: bool, offset: int) -> None:
+    def __init__(self, processID: int, priority: int, processor_time: int, mem_allocated: int, printer: bool, scanner: bool, modem: bool, driver: bool, offset: int, archive_op: list) -> None:
         self.processID = processID
         self.priority = priority
         self.processor_time = processor_time
+        self.instruction_counter = 1
         self.offset = offset
         self.mem_allocated = mem_allocated
-        self.printer = printer
-        self.scanner = scanner
-        self.modem = modem
-        self.driver = driver
-        self.print_creation()
+        self.to_do = []
+        self.create_to_do_list(printer, scanner, modem, driver, archive_op)
+        self.print_creation(printer, scanner, modem, driver)
 
+    # Brief: 
+    #   Creates the relation of all actions to do
+    # Param:
+    # Return: 
+    def create_to_do_list(self, printer, scanner, modem, driver, archive_op) -> None:
+        if printer != 0:    self.to_do.append([RESOURCE_ACTION, PRINTER_RESOURCE_REQUESTED])
+        if scanner != 0:    self.to_do.append([RESOURCE_ACTION, SCANNER_RESOURCE_REQUESTED])
+        if modem != 0:      self.to_do.append([RESOURCE_ACTION, MODEM_RESOURCE_REQUESTED])
+        if driver != 0:     self.to_do.append([RESOURCE_ACTION, SATA_RESOURCE_REQUESTED])
+        [self.to_do.append([ARCHIVE_ACTION, archive_op.pop(0)]) for _ in range(len(archive_op))]
+            
     # Brief: 
     #   Must execute the process, create files, delete, acess resources, etc... for "time" seconds, then return execution 
     #   OBS: If the process needs a resource (printer, scanner, etc) it returns either 
@@ -50,30 +63,57 @@ class Process():
     #   Return the code if the process ended (PROCESS_FINISHED) or not requested a resource (NO_RESOURCE_REQUEST) or 
     #   if it needs a resouce, so it should return some of these codes SCANNER_RESOURCE_REQUESTED, PRINTER_RESOURCE_REQUESTED, MODEM_RESOURCE_REQUESTED, SATA_RESOURCE_REQUESTED
     def run(self, time: int, ArchiveM: ArchiveManager) -> int:
-        print("process ", self.processID, " =>")
-        print("P", self.processID, " STARTED")
+        print("process", self.processID , "=>")
+        print("P" + str(self.processID), "STARTED")
 
-        '''Implementar'''
-        
-        return PROCESS_FINISHED       
-        print("P", self.processID, " return SIGINT")
+        # Execute instructions
+        for i in range(time):
+            # Instruction with duration of 1 second
+            remaining_time = 1
+            start = datetime.now()
+            while remaining_time > 0:
+                
+                if len(self.to_do) > 0:
+                    task = self.to_do.pop(0)
+
+                    # If needs some resource, let the system make the request, return the appropriate code
+                    if task[0] == RESOURCE_ACTION:
+                        return task[1]
+                    # If needs some archive operation, let the archive module handle
+                    elif task[0] == ARCHIVE_ACTION:
+                        op = task[1]
+                        if op[1] == CREATE_FILE_REQUEST:
+                            ArchiveM.createfile(self.processID, op[2], op[3])
+                        elif op[1] == CREATE_FILE_REQUEST:
+                            ArchiveM.deletefile(self.processID, op[2])
+                remaining_time = 1 - diff_time(datetime.now(), start)
+            
+            # End of an instruction
+            print("P" + str(self.processID), "instruction", self.instruction_counter)
+            if self.instruction_counter >= self.processor_time:
+                print("P" + str(self.processID),  "return SIGINT", "\n")
+                return PROCESS_FINISHED  
+            self.instruction_counter += 1
+        print("\n")
+        return NO_RESOURCE_REQUEST     
+                
 
     # Brief: 
     #   Must print the characteristics of the process on creation
     # Param:
     # Return: 
     #   None
-    def print_creation(self) -> None:
+    def print_creation(self, printer, scanner, modem, driver) -> None:
         print("dispatcher =>")
         print("    PID:     \t", self.processID)
         print("    offset:  \t", self.offset)
         print("    blocks:  \t", self.mem_allocated)
-        print("    priority:\t", self.offset)
+        print("    priority:\t", self.priority)
         print("    time:    \t", self.processor_time)
-        print("    printers:\t", self.printer)
-        print("    canners: \t", self.scanner)
-        print("    modems:  \t", self.modem)
-        print("    drives:  \t", self.driver, "\n")
+        print("    printers:\t", printer)
+        print("    canners: \t", scanner)
+        print("    modems:  \t", modem)
+        print("    drives:  \t", driver, "\n")
 
 
 class ProcessManager():
@@ -98,11 +138,13 @@ class ProcessManager():
     #   scanner: If there is a requisition on the scanner
     #   driver: Code of the requested driver
     #   offet: offset of the RAM memory in which the process was allocated
+    #   archive_op = a list of all archive operations to be executed
     # Return: 
     #   return id of the new process
-    def create(self, priority: int, processor_time: int, mem_allocated: int, printer: int, scanner: bool, modem: bool, driver: int, offset: int) -> int:
+    def create(self, priority: int, processor_time: int, mem_allocated: int, printer: int, scanner: bool, modem: bool, driver: int, offset: int, archive_op: list) -> int:
         new_id = self.last_given_id + 1
-        self.__processes[new_id] = Process(new_id, priority, processor_time, mem_allocated, printer, scanner, modem, driver, offset)
+        print("** Created process", new_id, "\n")
+        self.__processes[new_id] = Process(new_id, priority, processor_time, mem_allocated, printer, scanner, modem, driver, offset, archive_op)
         self.last_given_id = new_id
         return new_id
 
@@ -113,7 +155,7 @@ class ProcessManager():
     # Return: 
     #   None
     def delete(self, processID: int) -> None:
-        print("Deleted process with id", processID)
+        print("** Deleted process with id", processID, "\n")
         self.__processes.pop(processID)
 
     # Brief: 

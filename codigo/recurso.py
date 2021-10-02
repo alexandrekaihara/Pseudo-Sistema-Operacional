@@ -29,7 +29,7 @@ class ResourceManager():
     def __init__(self) -> None:
         self.__ready_processes_buffer = []
         self.scanner = Semaphore(1)
-        self.printer = Semaphore(2)
+        self.printer1  = Semaphore(2)
         self.modem   = Semaphore(1)
         self.sata    = Semaphore(2)
 

@@ -1,7 +1,7 @@
 # Brief: Contains all implementation and rules related to creating and deleting files
 # Author: Alexandre Kaihara and Pedro
 
-
+from variaveisglobais import *
 
 '''
 1.4 Estrutura do Sistema de Arquivos
@@ -38,10 +38,10 @@ class ArchiveManager():
     #   path: String containing the path to the file   
     # Return: 
     #   None
-    def __init__(self, path: str) -> None:
+    def __init__(self, memoryload: list) -> None:
         self.filemanagerlog = []
+        self.load_memory(memoryload)
         '''IMPLEMENT'''
-        self.read_file(path)
         pass
 
     # Brief: 
@@ -52,12 +52,12 @@ class ArchiveManager():
     #   filesize: Integer containing the number of blocks to be allocated
     # Return: 
     #   Returns integer which is a code if the file succeded of failed. If succeed on creating, return CREATE_FILE_SUCESS
-    def createfile(self, processID: int, filename: str, filesize: int) -> int:
+    def createfile(self, processID: int, filename: str, filesize: int):
         '''IMPLEMENT
         operationID: Integer correspondig to the status of the operation (eg. CREATE_FILE_SUCESS, CREATE_FILE_NOT_ENOUGTH_MEM)
         '''
         
-        self.__register_operation(processID, filename, operationID)
+        self.__register_operation(processID, filename, CREATE_FILE_SUCESS)
 
     # Brief: 
     #   Verify if given file exists on memory, if so, then delete it.
@@ -68,9 +68,9 @@ class ArchiveManager():
     #   Returns a integer
     def deletefile(self, processID: int, filename: str) -> int:
         '''IMPLEMENT
-        operationID: Integer correspondig to the status of the operation (eg. CREATE_FILE_SUCESS, CREATE_FILE_NOT_ENOUGTH_MEM)
+        operationID: Integer correspondig to the status of the operation (eg. DELETE_FILE_SUCESS, DELETE_FILE_NOT_PERMITTED, FILE_NOT_FOUND)
         '''
-        self.__register_operation(processID, filename, operationID)
+        self.__register_operation(processID, filename, DELETE_FILE_SUCESS)
 
     # Brief: 
     #   Register log of a file operation
@@ -125,10 +125,10 @@ class ArchiveManager():
         pass
 
     # Brief: 
-    #   Read the memory occupation file
+    #   Load the files.txt files on memory
     # Param:
-    #    path: path to the file 
+    #    load: List of the files on memory
     # Return: 
     #   None
-    def read_file(self, path: str) -> None:
+    def load_memory(self, load: list) -> None:
         pass

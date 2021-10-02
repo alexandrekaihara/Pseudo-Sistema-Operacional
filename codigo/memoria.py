@@ -24,7 +24,6 @@ OBS:
 '''
 
 
-
 class MemoryManager():
     # Brief: 
     #   Starts all variables and strutures of the memory
@@ -35,6 +34,7 @@ class MemoryManager():
     # Return: 
     #   Returns a integer
     def __init__(self) -> None:
+        
         '''Implementar'''
         pass
 
@@ -45,10 +45,11 @@ class MemoryManager():
     #   size: Process size to the accupied
     #   offset: At the end of execution, should set this variable with the offset given to the allocated process
     # Return: 
-    #   If there is no free memory available, return NOT_ENOUGH_RAM_MEMORY, else, 
+    #   If there is no free memory available, return NOT_ENOUGH_RAM_MEMORY, else, MEMORY_ALLOCATION_SUCESS
     #   Else return 0
     def load(self, processID: int, size: int, offset: list) -> int:
         '''Implementar'''
+        #offset[0] = 76
         return MEMORY_ALLOCATION_SUCESS
 
     # Brief: 
