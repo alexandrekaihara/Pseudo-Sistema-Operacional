@@ -34,9 +34,9 @@ class Process():
         self.processID = processID
         self.priority = priority
         self.processor_time = processor_time
-        self.instruction_counter = 1
         self.offset = offset
         self.mem_allocated = mem_allocated
+        self.instruction_counter = 1
         self.to_do = []
         self.create_to_do_list(printer, scanner, modem, driver, archive_op)
         self.print_creation(printer, scanner, modem, driver)
