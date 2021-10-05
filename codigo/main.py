@@ -13,7 +13,8 @@ def main():
         argv[1]
         argv[2]
     except:
-        print("To start the operational system, type the path to the processes file (PFILE) and the memory file (MFILE) as follows:\npython main.py [PFILE] [MFILE]")
+        print("To start the operational system, type the path to the processes file (PFILE)\
+             and the memory file (MFILE) as follows:\npython main.py [PFILE] [MFILE]")
         return 0
     os = PseudoOS(argv[1], argv[2])
     
