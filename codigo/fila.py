@@ -57,8 +57,25 @@ class QueueManager():
     #   processID: Identification of the process
     # Return: 
     def remove(self, processID: int) -> None:
-        '''Implementation'''
-        pass
+        for i in range(self.real_time.length):
+            aux = self.real_time.get()
+            if(aux != processID):
+                self.real_time.put(aux)
+
+        for i in range(self.user_1.length):
+            aux = self.user_1.get()
+            if(aux != processID):
+                self.user_1.put(aux)
+
+        for i in range(self.user_2.length):
+            aux = self.user_2.get()
+            if(aux != processID):
+                self.user_2.put(aux)
+
+        for i in range(self.user_3.length):
+            aux = self.user_3.get()
+            if(aux != processID):
+                self.user_3.put(aux)
     # Brief: 
     #   Remove a process from the queue and send it to be executed
     # Param:

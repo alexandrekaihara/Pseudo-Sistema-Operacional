@@ -65,7 +65,7 @@ class ResourceManager():
     # Return: 
     #   None
     def get_scanner(self, processID: int, priority: int) -> None:
-        '''Implementar'''
+        self.scanner.acquire()
         self.insert_buffer(processID, priority)
 
     # Brief: 
@@ -75,7 +75,7 @@ class ResourceManager():
     # Return: 
     #   None
     def get_printer(self, processID: int, priority: int) -> None:
-        '''Implementar'''
+        self.printer.acquire()
         self.insert_buffer(processID, priority)
     
     # Brief: 
@@ -85,7 +85,7 @@ class ResourceManager():
     # Return: 
     #   None
     def get_modem(self, processID: int, priority: int) -> None:
-        '''Implementar'''
+        self.modem.acquire()
         self.insert_buffer(processID, priority)
     
     # Brief: 
@@ -95,6 +95,6 @@ class ResourceManager():
     # Return: 
     #   None
     def get_sata(self, processID: int, priority: int) -> None:
-        '''Implementar'''
+        self.sata.acquire()
         self.insert_buffer(processID, priority)
     
