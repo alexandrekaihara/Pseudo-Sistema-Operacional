@@ -23,7 +23,7 @@ def main():
     threads.append(Thread(target=os.scheduler))
 
     [thread.start() for thread in threads]
-    [thread.join() for thread in threads]        
+    [thread.join() for thread in threads]    
     print("** Ending execution of Pseudo Operational System")
 
 if __name__ == "__main__":
