@@ -84,7 +84,7 @@ class Process():
                         op = task[1]
                         if op[1] == CREATE_FILE_REQUEST:
                             ArchiveM.createfile(self.processID, op[2], op[3])
-                        elif op[1] == CREATE_FILE_REQUEST:
+                        elif op[1] == DELETE_FILE_REQUEST:
                             ArchiveM.deletefile(self.processID, op[2])
                 remaining_time = 1 - diff_time(datetime.now(), start)
             
@@ -165,6 +165,8 @@ class ProcessManager():
     # Return: 
     #   Return a instance of a existing process
     def get_process(self, processID: int) -> Process:
+        print(self.__processes)
+        print(processID)
         return self.__processes[processID]
 
     # Brief: 

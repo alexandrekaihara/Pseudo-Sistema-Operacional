@@ -33,7 +33,7 @@ class PseudoOS():
         self.current_time = datetime.now()
         self.enqueue_process = []
         self.quantum = 1
-        self.ArchiveMan = ArchiveManager(self.memory_load)
+        self.ArchiveMan = ArchiveManager(self.memory_load, self.memory_size)
         self.MemoryMan  = MemoryManager()
         self.ProcessMan = ProcessManager()
         self.QueueMan   = QueueManager()
@@ -43,6 +43,7 @@ class PseudoOS():
     #   Thread for defining the next process to be executed
     # Param:
     # Return: 
+
     def scheduler(self) -> None:
         while self.ProcessMan.num_active_processes() > 0 or self.done != PROCESS_CREATION_FINISHED:
             # Reinsert blocked processess into the ready queue
