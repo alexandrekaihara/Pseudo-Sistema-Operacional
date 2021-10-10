@@ -24,6 +24,9 @@ def main():
 
     [thread.start() for thread in threads]
     [thread.join() for thread in threads]    
+    
+    os.ArchiveMan.print_file_log()
+    os.ArchiveMan.print_memory_occupation()
     print("** Ending execution of Pseudo Operational System")
 
 if __name__ == "__main__":
