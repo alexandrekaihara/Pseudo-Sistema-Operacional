@@ -23,7 +23,7 @@ def main():
     threads.append(Thread(target=os.scheduler))
 
     [thread.start() for thread in threads]
-    [thread.join() for thread in threads]   
+    [thread.join() for thread in threads]    
     
     os.ArchiveMan.print_file_log()
     os.ArchiveMan.print_memory_occupation()
