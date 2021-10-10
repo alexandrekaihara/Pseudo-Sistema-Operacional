@@ -73,8 +73,8 @@ class ArchiveManager():
         return self.__register_operation(processID, filename, CREATE_FILE_NOT_ENOUGTH_MEM)
 
     def __alocate(self, filename: str, size: int, processId: int, offset: int) -> None:
-        while(size>=0):
-            self.archive[offset + size - 1] = {"process_id": processId, "filename": filename}
+        while(size>0):
+            self.archive[offset + size] = {"process_id": processId, "filename": filename}
             size -= 1
 
     # Brief: 
@@ -94,7 +94,7 @@ class ArchiveManager():
                     offset = i if offset == 0 else offset
                     if(file["process_id"] == processID or file["process_id"] == -1 or isRealTime):
                         size +=1
-                        file = {}
+                        self.archive[i] = {}
                     else:
                         return self.__register_operation(processID, filename, DELETE_FILE_NOT_PERMITTED)
         if(size == 0):                
@@ -202,7 +202,6 @@ class ArchiveManager():
     #   None
     def load_memory(self, load: list) -> None:
         for line in load:
-
             try: # Process operations, ex: 0, 0, A, 5
                 int(line[0])
                 raise Exception("Something went wrong in file sistem initialization")
