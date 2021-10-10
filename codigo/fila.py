@@ -83,7 +83,6 @@ class QueueManager():
     #   Returns the integer that identify the next process to be executed, if there is no next process, return NO_NEXT_PROCESS
     def next_process(self) -> int:
         if(not self.real_time.empty()):
-            print(list(self.real_time.queue))
             return self.real_time.get()
         if(not self.user_1.empty()):
             return self.user_1.get()

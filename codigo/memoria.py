@@ -75,8 +75,8 @@ class MemoryManager():
         return NOT_ENOUGH_RAM_MEMORY
 
     def __alocate(self, size: int, offset: int) -> None:
-        while(size>0):
-            self.memory[offset + size] = True
+        while(size>=0):
+            self.memory[offset + size - 1] = True
             size -= 1
         
 
@@ -88,8 +88,8 @@ class MemoryManager():
     # Return: 
     #   None
     def remove(self, processID: int, size: int, offset: list) -> None:
-        while(size>0):
-            self.memory[offset + size] = False
+        while(size>=0):
+            self.memory[offset + size - 1] = False
             size -= 1
         
 

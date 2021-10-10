@@ -55,6 +55,7 @@ class ArchiveManager():
     def createfile(self, processID: int, filename: str, filesize: int) -> int:
         i: int = 0
         count = 0
+
         while(i < len(self.archive)):
             if (self.archive[i] != {}):
                 if(count >= filesize):
@@ -63,18 +64,18 @@ class ArchiveManager():
                 count = 0
             else:
                 count+=1
-
-            if(count >= filesize):
-                self.__alocate(filename, filesize, processID, (i-count))
-                return self.__register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
                 
             i+=1
+
+        if(count >= filesize):
+            self.__alocate(filename, filesize, processID, (i-count))
+            return self.__register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
 
         return self.__register_operation(processID, filename, CREATE_FILE_NOT_ENOUGTH_MEM)
 
     def __alocate(self, filename: str, size: int, processId: int, offset: int) -> None:
         while(size>0):
-            self.archive[offset + size] = {"process_id": processId, "filename": filename}
+            self.archive[offset + size - 1] = {"process_id": processId, "filename": filename}
             size -= 1
 
     # Brief: 
@@ -85,13 +86,13 @@ class ArchiveManager():
     # Return: 
     #   Returns a integer
     def deletefile(self, processID: int, filename: str, isRealTime) -> int:
-        offset =0
+        offset =-1
         size =0
         for i in range(len(self.archive)):
             file = self.archive[i]
             if( file != {}):
                 if(file["filename"] == filename):
-                    offset = i if offset == 0 else offset
+                    offset = i if offset == -1 else offset
                     if(file["process_id"] == processID or file["process_id"] == -1 or isRealTime):
                         size +=1
                         self.archive[i] = {}
@@ -157,19 +158,19 @@ class ArchiveManager():
             log = self.filemanagerlog[i]
             parsed_operation = self.parseOperation(log["operation"])
             operation = parsed_operation["operation"]
-            status = parsed_operation["status"];
+            status = parsed_operation["status"]
             print("Operação {index} => {status}"
                 .format(
                     index = i+1, 
                     status = ( "Sucesso" if status else "Falhou")
                 )
             )
-            print("O processo {process}{status_identifier}o arquivo {file} {reason}"
+            print("O processo {process}{status_identifier} o arquivo {file}. {reason}"
                 .format(
                     process = log["process_id"], 
                     status_identifier = " {op}".format(op="criou" if operation == 0 else "deletou") if status else " não pode {op}".format(op="crear" if operation == 0 else "deletar"),
                     file = log["filename"],
-                    reason = ", "+parsed_operation["reason"] if parsed_operation["reason"] != "" else "Blocos: {start} .. {end}".format(start=log["offset"], end=log["offset"]+log["filesize"] -1 )
+                    reason = parsed_operation["reason"] if parsed_operation["reason"] != "" else "Blocos: {start} .. {end}".format(start=log["offset"], end=log["offset"]+log["filesize"]-1 )
                 )
             )
 

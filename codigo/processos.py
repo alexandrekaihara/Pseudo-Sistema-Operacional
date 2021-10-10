@@ -165,8 +165,6 @@ class ProcessManager():
     # Return: 
     #   Return a instance of a existing process
     def get_process(self, processID: int) -> Process:
-        print(self.__processes)
-        print(processID)
         return self.__processes[processID]
 
     # Brief: 
