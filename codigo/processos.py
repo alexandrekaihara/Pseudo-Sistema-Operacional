@@ -85,7 +85,7 @@ class Process():
                         if op[1] == CREATE_FILE_REQUEST:
                             ArchiveM.createfile(self.processID, op[2], op[3])
                         elif op[1] == DELETE_FILE_REQUEST:
-                            ArchiveM.deletefile(self.processID, op[2])
+                            ArchiveM.deletefile(self.processID, op[2], self.priority == 0)
                 remaining_time = 1 - diff_time(datetime.now(), start)
             
             # End of an instruction
