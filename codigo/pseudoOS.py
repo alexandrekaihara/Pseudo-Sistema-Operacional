@@ -64,7 +64,7 @@ class PseudoOS():
                 
                 # If the process has finished, so it has to free the memory occupied by the process
                 if code == PROCESS_FINISHED:
-                    self.MemoryMan.remove(id, pr.mem_allocated)
+                    self.MemoryMan.remove(id, pr.mem_allocated, pr.offset)
                     self.ProcessMan.delete(id)
                 # If the running process not requested a resource, must get back to the ready queue
                 elif code == NO_RESOURCE_REQUEST:

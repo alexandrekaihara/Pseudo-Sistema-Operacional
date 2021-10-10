@@ -33,10 +33,9 @@ class MemoryManager():
     #   filename: String containing the filename
     # Return: 
     #   Returns a integer
+   
     def __init__(self) -> None:
-        
-        '''Implementar'''
-        pass
+        self.memory = [False] * 1024 # False means that the block is free and true means it is ocupied
 
     # Brief: 
     #   Load on RAM memory the process
@@ -48,9 +47,34 @@ class MemoryManager():
     #   If there is no free memory available, return NOT_ENOUGH_RAM_MEMORY, else, MEMORY_ALLOCATION_SUCESS
     #   Else return 0
     def load(self, processID: int, size: int, offset: list) -> int:
-        '''Implementar'''
-        #offset[0] = 76
-        return MEMORY_ALLOCATION_SUCESS
+        i = 0
+        unsorted_free = {}
+        while(i < len(self.memory)):
+            if (self.memory[i] == False and count > 0):
+                unsorted_free[i - count] = count
+                count = 0
+            else:
+                count+=1
+                
+            
+            i+=1
+                
+        free = sorted(unsorted_free.items(), key = lambda kv:(kv[1], kv[0]))
+
+        for m in free:
+            if(free[m] >= size ):
+                offset[0] = m
+                self.alocate(size,offset[0])
+                return MEMORY_ALLOCATION_SUCESS
+
+        return NOT_ENOUGH_RAM_MEMORY
+
+    def alocate(self, size: int, offset: int):
+        while(size>=0):
+            self.memory[offset + size - 1] = True
+            size -= 1
+        pass
+
 
     # Brief: 
     #   Remove from memory
@@ -58,7 +82,9 @@ class MemoryManager():
     #   processID: Integer representing the process ID
     # Return: 
     #   None
-    def remove(self, processID: int, size: int) -> None:
-        '''Implementar'''
+    def remove(self, processID: int, size: int, offset: list) -> None:
+        while(size>0):
+            self.memory[offset + size - 1] = False
+            size -= 1
         pass
 
