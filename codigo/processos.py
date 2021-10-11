@@ -45,12 +45,13 @@ class Process():
     #   Creates the relation of all actions to do
     # Param:
     # Return: 
-    def create_to_do_list(self, printer, scanner, modem, driver, archive_op) -> None:
+    def create_to_do_list(self, printer: int, scanner: int, modem: int, driver: int, archive_op: list) -> None:
         if printer != 0:    self.to_do.append([RESOURCE_ACTION, PRINTER_RESOURCE_REQUESTED])
         if scanner != 0:    self.to_do.append([RESOURCE_ACTION, SCANNER_RESOURCE_REQUESTED])
         if modem != 0:      self.to_do.append([RESOURCE_ACTION, MODEM_RESOURCE_REQUESTED])
         if driver != 0:     self.to_do.append([RESOURCE_ACTION, SATA_RESOURCE_REQUESTED])
-        [self.to_do.append([ARCHIVE_ACTION, archive_op.pop(0)]) for _ in range(len(archive_op))]
+        if len(archive_op) > 0:
+            [self.to_do.append([ARCHIVE_ACTION, archive_op.pop(0)]) for _ in range(len(archive_op))]
             
     # Brief: 
     #   Must execute the process, create files, delete, acess resources, etc... for "time" seconds, then return execution 
@@ -142,10 +143,9 @@ class ProcessManager():
     # Return: 
     #   return id of the new process
     def create(self, priority: int, processor_time: int, mem_allocated: int, printer: int, scanner: bool, modem: bool, driver: int, offset: int, archive_op: list) -> int:
-        new_id = self.last_given_id + 1
+        new_id = self.last_given_id
         print("** Created process", new_id, "\n")
         self.__processes[new_id] = Process(new_id, priority, processor_time, mem_allocated, printer, scanner, modem, driver, offset, archive_op)
-        self.last_given_id = new_id
         return new_id
 
     # Brief: 
@@ -168,12 +168,13 @@ class ProcessManager():
         return self.__processes[processID]
 
     # Brief: 
-    #   Returns the next process id
+    #   Increment id and return its value
     # Param:
     # Return: 
     #   Return the next id to be given
     def get_next_process_id(self) -> int:
-        return self.last_given_id + 1
+        self.last_given_id += 1
+        return self.last_given_id
     
     # Brief: 
     #   Returns the number of active processes

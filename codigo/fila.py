@@ -4,6 +4,8 @@
 from variaveisglobais import *
 
 from queue import Queue
+from datetime import datetime
+from threading import Semaphore
 
 '''
 O programa deve ter duas filas de prioridades distintas: a fila de processos de tempo real e a fila de
@@ -29,11 +31,19 @@ class QueueManager():
     #   None
     # Return: 
     #   None
-    def __init__(self):
-        self.real_time  = Queue(); # FIFO 0
-        self.user_1     = Queue () # Priority 1
-        self.user_2     = Queue (); # Priority 2
-        self.user_3     = Queue (); # Priority 3
+    def __init__(self, aging_time):
+        self.aging_time = aging_time
+        self.real_time_sem = Semaphore(1)
+        self.user_1_sem = Semaphore(1)
+        self.user_2_sem = Semaphore(1)
+        self.user_3_sem = Semaphore(1)
+        self.real_time  = Queue()
+        self.user_1     = Queue()
+        self.user_2     = Queue()
+        self.user_3     = Queue()
+        self.queues = [self.real_time, self.user_1, self.user_2, self.user_3]
+        self.sems = [self.real_time_sem, self.user_1_sem, self.user_2_sem, self.user_3_sem]
+
     # Brief: 
     #   Insert new process on the queue according to the priority
     # Param:
@@ -42,52 +52,75 @@ class QueueManager():
     # Return: 
     #   None
     def insert(self, processID: int, priority: int) -> None:
-        print("** Inserted process", processID, "with priority", priority, "\n")
-        if(priority == 1):
-            self.user_1.put(processID)
-        elif(priority == 2):
-            self.user_2.put(processID)
-        elif(priority == 3):
-            self.user_3.put(processID)
+        if priority <= 3:
+            print("** Inserted process", processID, " on queue with priority", priority, "\n")
+            now = datetime.now()
+            process = (processID, now)
+            queue = self.queues[priority]
+            sem = self.sems[priority]
+
+            # Insert process on right queue
+            sem.acquire()
+            queue.put(process)
+            sem.release()
         else:
-            self.real_time.put(processID)
+            print("[ERROR] Requested priority not permitted")
+
     # Brief: 
     #   Remove a process from the queue by its ID
     # Param:
     #   processID: Identification of the process
+    #   priority: priority of the process
     # Return: 
-    def remove(self, processID: int) -> None:
-        for i in range(self.real_time.length):
-            aux = self.real_time.get()
+    def remove(self, processID: int, priority: int) -> None:
+        queue = self.queues[priority]
+        sem = self.sems[priority]
+        # Find process and remove it from queue
+        def removeitem(processID: int) -> None:
+            aux, insertion_time = queue.get()
             if(aux != processID):
-                self.real_time.put(aux)
-
-        for i in range(self.user_1.length):
-            aux = self.user_1.get()
-            if(aux != processID):
-                self.user_1.put(aux)
-
-        for i in range(self.user_2.length):
-            aux = self.user_2.get()
-            if(aux != processID):
-                self.user_2.put(aux)
-
-        for i in range(self.user_3.length):
-            aux = self.user_3.get()
-            if(aux != processID):
-                self.user_3.put(aux)
+                queue.put((aux, insertion_time))
+        # Remove item from queue
+        sem.acquire()
+        [removeitem(processID) for _ in range(len(queue.queue))]
+        sem.release()
+        
+    # Brief: 
+    #   Verify if all processes are over the aging time and put on a higher priority queue
+    # Param:
+    # Return
+    def aging(self) -> None:
+        now = datetime.now()
+        # Get all processes to be aged
+        for priority in range(2, 4):
+            # Get list of all processID with aging time higher than self.aging_time
+            processes = [id for id, insertion_time in list(self.queues[priority].queue) \
+                if diff_time(now, insertion_time) > self.aging_time]
+            # Remove them and insert on a higher priority file
+            if len(processes) > 0:
+                print("** Priority ", priority, " queue has to these processes to be aged", processes, "\n")
+            [self.remove(id, priority) for id in processes]
+            [self.insert(id, priority-1) for id in processes]
+        
     # Brief: 
     #   Remove a process from the queue and send it to be executed
     # Param:
     # Return: 
     #   Returns the integer that identify the next process to be executed, if there is no next process, return NO_NEXT_PROCESS
     def next_process(self) -> int:
-        if(not self.real_time.empty()):
-            return self.real_time.get()
-        if(not self.user_1.empty()):
-            return self.user_1.get()
-        if(not self.user_2.empty()):
-            return self.user_2.get()
-        if(not self.user_3.empty()):
-            return self.user_3.get()
+        for priority in range(4):
+            if(not self.queues[priority].empty()):
+                return self.__get_next(priority)[0]
         return NO_NEXT_PROCESS
+    
+    # Brief: 
+    #   Remove the next process according to the priority
+    # Param:
+    #   priority: Priority of the process
+    # Return: 
+    #   Returns the integer that identify the next process to be executed
+    def __get_next(self, priority: int) -> int:
+        self.sems[priority].acquire() 
+        aux = self.queues[priority].get()
+        self.sems[priority].release()
+        return aux 

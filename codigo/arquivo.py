@@ -53,6 +53,7 @@ class ArchiveManager():
     # Return: 
     #   Returns integer which is a code if the file succeded of failed. If succeed on creating, return CREATE_FILE_SUCESS
     def createfile(self, processID: int, filename: str, filesize: int) -> int:
+        print("** Process", processID, " creating a file named", filename, "\n")
         i: int = 0
         count = 0
 
@@ -60,18 +61,17 @@ class ArchiveManager():
             if (self.archive[i] != {}):
                 if(count >= filesize):
                     self.__alocate(filename, filesize, processID, (i-count))
-                    return self.__register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
+                    return self.register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
                 count = 0
             else:
                 count+=1
-                
             i+=1
 
         if(count >= filesize):
             self.__alocate(filename, filesize, processID, (i-count))
-            return self.__register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
+            return self.register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
 
-        return self.__register_operation(processID, filename, CREATE_FILE_NOT_ENOUGTH_MEM)
+        return self.register_operation(processID, filename, CREATE_FILE_NOT_ENOUGTH_MEM)
 
     def __alocate(self, filename: str, size: int, processId: int, offset: int) -> None:
         while(size>0):
@@ -86,6 +86,7 @@ class ArchiveManager():
     # Return: 
     #   Returns a integer
     def deletefile(self, processID: int, filename: str, isRealTime) -> int:
+        print("** Process", processID, " deleting a file named", filename, "\n")
         offset =-1
         size =0
         for i in range(len(self.archive)):
@@ -97,11 +98,11 @@ class ArchiveManager():
                         size +=1
                         self.archive[i] = {}
                     else:
-                        return self.__register_operation(processID, filename, DELETE_FILE_NOT_PERMITTED)
+                        return self.register_operation(processID, filename, DELETE_FILE_NOT_PERMITTED)
         if(size == 0):                
-            return self.__register_operation(processID, filename, FILE_NOT_FOUND)
+            return self.register_operation(processID, filename, FILE_NOT_FOUND)
         else:
-            return self.__register_operation(processID, filename, DELETE_FILE_SUCESS, offset=offset, filesize=size)
+            return self.register_operation(processID, filename, DELETE_FILE_SUCESS, offset=offset, filesize=size)
 
     # Brief: 
     #   Register log of a file operation
@@ -111,7 +112,7 @@ class ArchiveManager():
     #   operationID: Integer correspondig to the status of the operation (eg. CREATE_FILE_SUCESS, CREATE_FILE_NOT_ENOUGTH_MEM)
     # Return: 
     #   Returns a integer
-    def __register_operation(self, processID: int, filename: str, operationID: int, offset: int = 0, filesize: int = 0) -> int:
+    def register_operation(self, processID: int, filename: str, operationID: int, offset: int = 0, filesize: int = 0) -> int:
         self.filemanagerlog.append({"process_id": processID, "operation": operationID, "filename": filename, "offset": offset, "filesize": filesize});
         return operationID
         
@@ -140,16 +141,19 @@ class ArchiveManager():
     def parseOperation(self, operationID: int):
         if(operationID == CREATE_FILE_SUCESS):
             return {"status": True, "operation": 0,"reason": ""}
-        if(operationID == CREATE_FILE_NOT_ENOUGTH_MEM):
+        elif(operationID == CREATE_FILE_NOT_ENOUGTH_MEM):
             return {"status": False, "operation": 0, "reason": "Memória insuficiente"}
-        if(operationID == CREATE_FILE_NAME_IN_USE):   
+        elif(operationID == CREATE_FILE_NAME_IN_USE):   
             return {"status": False, "operation": 0, "reason": "Arquivo já existe"}     
-        if(operationID == DELETE_FILE_SUCESS):
+        elif(operationID == DELETE_FILE_SUCESS):
             return {"status": True, "operation": 1, "reason": ""}
-        if(operationID == DELETE_FILE_NOT_PERMITTED):
+        elif(operationID == DELETE_FILE_NOT_PERMITTED):
             return {"status": False, "operation": 1, "reason": "Acesso negado"}        
-        if(operationID == FILE_NOT_FOUND):   
+        elif(operationID == FILE_NOT_FOUND):   
             return {"status": False, "operation": 1, "reason": "Arquivo nao encontrado"} 
+        elif(operationID == INVALID_PROCESS_ID):   
+            return {"status": False, "operation": 1, "reason": "O processo não existe"} 
+            
 
 
     def print_file_log(self) -> None:
@@ -162,17 +166,18 @@ class ArchiveManager():
             print("Operação {index} => {status}"
                 .format(
                     index = i+1, 
-                    status = ( "Sucesso" if status else "Falhou")
+                    status = ( "Sucesso" if status else "Falha")
                 )
             )
             print("O processo {process}{status_identifier} o arquivo {file}. {reason}"
                 .format(
                     process = log["process_id"], 
-                    status_identifier = " {op}".format(op="criou" if operation == 0 else "deletou") if status else " não pode {op}".format(op="crear" if operation == 0 else "deletar"),
+                    status_identifier = " {op}".format(op="criou" if operation == 0 else "deletou") if status else " não pode {op}".format(op="criar" if operation == 0 else "deletar"),
                     file = log["filename"],
                     reason = parsed_operation["reason"] if parsed_operation["reason"] != "" else "Blocos: {start} .. {end}".format(start=log["offset"], end=log["offset"]+log["filesize"]-1 )
                 )
             )
+            print("")
 
 
     # Brief: 

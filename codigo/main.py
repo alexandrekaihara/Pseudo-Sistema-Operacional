@@ -2,10 +2,12 @@
 # Author: Alexandre Kaihara and Pedro
 # cd C:\Users\Kaihara\Desktop\FSO-PSEUDO-SO\codigo
 # python main.py input/test/processes.txt input/test/files.txt
+# python main.py input/aging/processes.txt input/aging/files.txt
 
 from sys import argv
 from threading import Thread
 from pseudoOS import PseudoOS
+from variaveisglobais import *
 
 
 def main():
@@ -16,6 +18,7 @@ def main():
         print("To start the operational system, type the path to the processes file (PFILE)\
              and the memory file (MFILE) as follows:\npython main.py [PFILE] [MFILE]")
         return 0
+    
     os = PseudoOS(argv[1], argv[2])
     
     threads = []

@@ -25,6 +25,7 @@ class PseudoOS():
         self.archive_op = {}
         self.memory_load = []
         self.memory_size = 0
+        self.aging_time = 10
         self.read_processes(process_path)
         self.read_archive(memory_path)
 
@@ -36,18 +37,24 @@ class PseudoOS():
         self.ArchiveMan = ArchiveManager(self.memory_load, self.memory_size)
         self.MemoryMan  = MemoryManager()
         self.ProcessMan = ProcessManager()
-        self.QueueMan   = QueueManager()
+        self.QueueMan   = QueueManager(self.aging_time)
         self.ResourcesMan = ResourceManager()
+
+        # Check if all the file operations has all required processes
+        self.check_consistency(self.ArchiveMan)
 
     # Brief: 
     #   Thread for defining the next process to be executed
     # Param:
     # Return: 
-
     def scheduler(self) -> None:
         while self.ProcessMan.num_active_processes() > 0 or self.done != PROCESS_CREATION_FINISHED:
             # Reinsert blocked processess into the ready queue
             [self.QueueMan.insert(id, priority) for (id, priority) in self.ResourcesMan.get_buffer()]
+            self.ResourcesMan.empty_buffer()
+
+            # Apply aging before checking next process
+            self.QueueMan.aging()
 
             # Check which is the next process to be run, if there is a process it is removed from queue
             id = self.QueueMan.next_process()
@@ -85,6 +92,8 @@ class PseudoOS():
             # Define the sleep duration
             delta = datetime.now() - self.current_time
             wait = p[0] - delta.seconds + delta.microseconds/1000000
+            if wait < 0:
+                wait = 0
             sleep(wait)
             
             # Create process if possible
@@ -92,10 +101,15 @@ class PseudoOS():
             id = self.ProcessMan.get_next_process_id()
             code = self.MemoryMan.load(id, p[3], offset)
             if code != NOT_ENOUGH_RAM_MEMORY:
-                id = self.ProcessMan.create(p[1], p[2], p[3], p[4], p[5], p[6], p[7], offset[0], self.archive_op[id])
-
+                if id in self.archive_op.keys():
+                    op = self.archive_op[id]
+                else:
+                    op = []
+                id = self.ProcessMan.create(p[1], p[2], p[3], p[4], p[5], p[6], p[7], offset[0], op)
+                self.QueueMan.insert(id, p[1])
+            else:
+                print("** Process", id, " couldn't be allocated. RAM memory out of space.\n")
             # Insert on queue to be executed
-            self.QueueMan.insert(id, p[1])
         self.done = PROCESS_CREATION_FINISHED
 
     # Brief: 
@@ -129,6 +143,10 @@ class PseudoOS():
         # Convert string to integer
         for i in range(len(self.processes)):
             self.processes[i] = [int(item.strip("\n")) for item in self.processes[i]]
+        # Sort by its spawning time
+        def fun(e):
+            return e[0]
+        self.processes.sort(key=fun)
         # Verify if every line on the file has 8 elements
         if sum([1 for line in self.processes if len(line) != 8]) != 0:
             raise Exception("Wrong file or incorrect file content")
@@ -154,6 +172,15 @@ class PseudoOS():
             self.archive_op[op[0]] = []
         for op in operations:
             self.archive_op[op[0]].append(op)
-        
     
-            
+    # Brief: 
+    #   Check if the all the process exists for each file operation
+    # Param:
+    #   path: path to the file
+    # Return: 
+    #   None
+    def check_consistency(self, ArchiveM: ArchiveManager) -> None:
+        max_process_id = len(self.processes) - 1 
+        [ArchiveM.register_operation(id, self.archive_op[id][0][1], operationID=INVALID_PROCESS_ID) \
+            for id in self.archive_op.keys() \
+                if id > max_process_id]

@@ -1,6 +1,7 @@
 # Brief: Contains all constants used on all programs
 # Author: Alexandre Kaihara and Pedro
 
+
 # other
 PROCESS_DO_NOT_EXISTS = -100                          # WHEN ANY OPERATION ON SYSTEM COULD NOT BE COMPLETED BECAUSE GIVEN PROCESS ID DOES NOT EXIST
 PROCESS_FINISHED = 11
@@ -16,6 +17,7 @@ FILE_NOT_FOUND = 120                                # WHEN GIVEN FILENAME COULD 
 CREATE_FILE_REQUEST = 0
 DELETE_FILE_REQUEST = 1
 NO_FILE_REQUEST = 132
+INVALID_PROCESS_ID = 133
 
 # memoria.py
 NOT_ENOUGH_RAM_MEMORY = 200                         # WHEN THERE IS NO FREE SPACE ON RAM FOR A PROCESS
@@ -33,7 +35,6 @@ SATA_RESOURCE_REQUESTED = 404                       # WHEN THE RUNNING PROCESS R
 ARCHIVE_ACTION = 410
 INSTRUCTION_ACTION = 411
 RESOURCE_ACTION = 412
-
 
 def diff_time(time1, time2):
     delta = time1 - time2
