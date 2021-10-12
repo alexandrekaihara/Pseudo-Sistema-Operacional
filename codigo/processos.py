@@ -7,6 +7,7 @@ from variaveisglobais import *
 from arquivo import ArchiveManager
 from datetime import datetime
 from time import sleep
+from random import randint
 
 '''
 Módulo de Processos – classes e estruturas de dados relativas ao processo. Basicamente,
@@ -73,9 +74,9 @@ class Process():
             remaining_time = 1
             start = datetime.now()
             while remaining_time > 0:
-                
-                if len(self.to_do) > 0:
-                    task = self.to_do.pop(0)
+                num_tasks = len(self.to_do)
+                if num_tasks > 0:
+                    task = self.to_do.pop(randint(0, 100) % num_tasks)
 
                     # If needs some resource, let the system make the request, return the appropriate code
                     if task[0] == RESOURCE_ACTION:
