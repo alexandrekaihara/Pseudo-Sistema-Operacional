@@ -3,33 +3,6 @@
 
 from variaveisglobais import *
 
-'''
-1.4 Estrutura do Sistema de Arquivos
-O pseudo-SO deve permitir que cada processo possa criar e deletar arquivos. Na criação de um
-arquivo, os dados devem ficar residentes no disco, mesmo após o encerramento do processo. O sistema de
-arquivos fará a alocação por meio do método de alocação contígua. Contudo, o arquivo deve ser tratado
-como uma unidade de manipulação. Além disso, para que possamos ter a mesma tomada de decisão, vamos
-considerar que o algoritmo a ser usado no armazenamento do disco (embora não seja usual ser usado na
-alocação do disco) seja o first-fit (sempre considerando a busca a partir do primeiro bloco do disco).
-Além disso, o sistema de arquivos deve garantir que os processos de tempo real possam criar (se
-tiver espaço) e deletar qualquer arquivo (mesmo que não tenha sido criado pelo processo). Por outro lado, os
-processos comuns do usuário, só podem deletar arquivos que tenham sido criados por eles, e podem criar
-quantos arquivos desejarem, no tamanho que for solicitado (se houver espaço suficiente).
-O sistema de arquivos terá como entrada um arquivo com extensão .txt, que contém a quantidade
-total de blocos no disco, a especificação dos segmentos ocupados por cada arquivo, as operações a serem
-realizadas por cada processo.
-Assim, após o pseudo-SO executar todos os processos, ele deve mostrar na tela do computador um
-mapa com a atual ocupação do disco, descrevendo quais arquivos estão em cada bloco, e quais são os
-blocos vazios (identificados por 0).
-
-
-Observações:
-- Quando for criar um bloco na memória, marcar cada bloco ocupado com o nome do arquivo que a ocupou;
-- O sistema de arquivos fará a alocação por meio do método de alocação contígua;
-- Algoritmo de armazenamento é first-fit (sempre considerando a busca a partir do primeiro bloco do disco);
-- Arquivos só podem ser deletados pelo próprio usuário que a criou. Se o processo for do tipo "tempo real", pode deletar qualquer um;
-'''
-
 
 class ArchiveManager():
     # Brief: 
@@ -40,9 +13,9 @@ class ArchiveManager():
     #   None
     def __init__(self, memoryload: list, memory_size: int) -> None:
         self.filemanagerlog = []
+        self.existing_files = {}
         self.archive = [{}] * memory_size
         self.load_memory(memoryload)
-    
 
     # Brief: 
     #   Verify using first-fit a contiguous available memmory free and create file.
@@ -52,32 +25,37 @@ class ArchiveManager():
     #   filesize: Integer containing the number of blocks to be allocated
     # Return: 
     #   Returns integer which is a code if the file succeded of failed. If succeed on creating, return CREATE_FILE_SUCESS
-    def createfile(self, processID: int, filename: str, filesize: int) -> int:
+    def createfile(self, processID: int, filename: str, filesize: int, priority: int) -> int:
         print("** Process", processID, " creating a file named", filename, "\n")
+        # Check if the file name and user already exists
+        keys = self.existing_files.keys()
+        if (processID, filename) in keys or (-1, filename) in keys:
+            return self.register_operation(processID, filename, CREATE_FILE_NAME_IN_USE, offset= (-1), filesize=filesize)
+        
+        # Iterate over all memory to check the first contiguous space to store a new file
         i: int = 0
-        count = 0
-
+        count = 0  
         while(i < len(self.archive)):
             if (self.archive[i] != {}):
                 if(count >= filesize):
-                    self.__alocate(filename, filesize, processID, (i-count))
+                    self.__alocate(filename, filesize, processID, (i-count), priority)
+                    self.existing_files[(processID, filename)] = (i-count, filesize)
                     return self.register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
                 count = 0
             else:
                 count+=1
             i+=1
-
         if(count >= filesize):
-            self.__alocate(filename, filesize, processID, (i-count))
+            self.__alocate(filename, filesize, processID, (i-count), priority)
+            self.existing_files[(processID, filename)] = (i-count, filesize)
             return self.register_operation(processID, filename, CREATE_FILE_SUCESS, offset= (i-count), filesize=filesize)
-
         return self.register_operation(processID, filename, CREATE_FILE_NOT_ENOUGTH_MEM)
-
-    def __alocate(self, filename: str, size: int, processId: int, offset: int) -> None:
+    
+    def __alocate(self, filename: str, size: int, processId: int, offset: int, priority: int) -> None:
         while(size>0):
-            self.archive[offset + size - 1] = {"process_id": processId, "filename": filename}
+            self.archive[offset + size - 1] = {"process_id": processId, "filename": filename, "priority": priority}
             size -= 1
-
+    
     # Brief: 
     #   Verify if given file exists on memory, if so, then delete it.
     # Param:
@@ -94,7 +72,12 @@ class ArchiveManager():
             if( file != {}):
                 if(file["filename"] == filename):
                     offset = i if offset == -1 else offset
-                    if(file["process_id"] == processID or file["process_id"] == -1 or isRealTime):
+                    # if is a real-time process it can delete any file
+                    if isRealTime:
+                        size +=1
+                        self.archive[i] = {}
+                    # If is not real-time, if the file was not created by a realtime or has no owner
+                    elif(file["priority"] > 0 or file["process_id"] == -1):
                         size +=1
                         self.archive[i] = {}
                     else:
@@ -103,7 +86,7 @@ class ArchiveManager():
             return self.register_operation(processID, filename, FILE_NOT_FOUND)
         else:
             return self.register_operation(processID, filename, DELETE_FILE_SUCESS, offset=offset, filesize=size)
-
+    
     # Brief: 
     #   Register log of a file operation
     # Param:
@@ -114,8 +97,7 @@ class ArchiveManager():
     #   Returns a integer
     def register_operation(self, processID: int, filename: str, operationID: int, offset: int = 0, filesize: int = 0) -> int:
         self.filemanagerlog.append({"process_id": processID, "operation": operationID, "filename": filename, "offset": offset, "filesize": filesize});
-        return operationID
-        
+        return operationID    
     
     # Brief: 
     #   Print the log of the file operations
@@ -124,20 +106,6 @@ class ArchiveManager():
     #   filename: String containing the filename
     # Return: 
     #   Returns a integer
-    '''
-        Example:
-        Sistema de arquivos =>
-        Operação 1 => Falha
-        O processo 0 não pode criar o arquivo A (falta de espaço).
-        Operação 2 => Sucesso
-        O processo 0 deletou o arquivo X.
-        Operação 3 => Falha
-        O processo 2 não existe.
-        Operação 4 => Sucesso
-        O processo 0 criou o arquivo D (blocos 0, 1 e 2).
-        Operação 5 => Falha
-        O processo 1 não pode deletar o arquivo E porque ele não existe.
-    '''
     def parseOperation(self, operationID: int):
         if(operationID == CREATE_FILE_SUCESS):
             return {"status": True, "operation": 0,"reason": ""}
@@ -153,9 +121,7 @@ class ArchiveManager():
             return {"status": False, "operation": 1, "reason": "Arquivo nao encontrado"} 
         elif(operationID == INVALID_PROCESS_ID):   
             return {"status": False, "operation": 1, "reason": "O processo não existe"} 
-            
-
-
+    
     def print_file_log(self) -> None:
         print("Sistema de arquivos =>")
         for i in range(len(self.filemanagerlog)):
@@ -178,8 +144,7 @@ class ArchiveManager():
                 )
             )
             print("")
-
-
+    
     # Brief: 
     #   Print the allocation of memory on disk
     # Param:
@@ -187,19 +152,14 @@ class ArchiveManager():
     #   filename: String containing the filename
     # Return: 
     #   Returns a integer
-    '''
-        Example 
-        D D D Y 0 Z Z Z 0 0 
-    '''
     def print_memory_occupation(self) -> None:
         for file in self.archive:
             if(file != {}):
                 print("{filename} |".format(filename = file["filename"]),end = ' ')
             else:
                 print("0 |",end = ' ')
-
         print("")
-
+    
     # Brief: 
     #   Load the files.txt files on memory
     # Param:
@@ -216,6 +176,7 @@ class ArchiveManager():
                 offset = line[1]
                 filesize = line[2]
                 for i in range(filesize):
-                    self.archive[offset + i] = {"process_id": -1, "filename": filename}
+                    self.archive[offset + i] = {"process_id": -1, "filename": filename, 'priority': -1}
+                self.existing_files[(-1, filename)] = (offset, filesize)
                 
          

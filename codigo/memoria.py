@@ -56,9 +56,7 @@ class MemoryManager():
                     unsorted_free[i - count] = count
                 count = 0
             else:
-                count+=1
-                
-            
+                count+=1 
             i+=1
 
         if(count > 0):
@@ -79,8 +77,6 @@ class MemoryManager():
             self.memory[offset + size - 1] = True
             size -= 1
         
-
-
     # Brief: 
     #   Remove from memory
     # Param:

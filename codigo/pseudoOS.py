@@ -56,7 +56,7 @@ class PseudoOS():
             # Apply aging before checking next process
             self.QueueMan.aging()
 
-            # Check which is the next process to be run, if there is a process it is removed from queue
+            # Check which is the next process to be run, if there is a process it must be removed from queue
             id = self.QueueMan.next_process()
             # If there is next process
             if id != NO_NEXT_PROCESS:

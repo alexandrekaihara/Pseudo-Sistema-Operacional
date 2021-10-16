@@ -49,8 +49,8 @@ class Process():
     def create_to_do_list(self, printer: int, scanner: int, modem: int, driver: int, archive_op: list) -> None:
         if printer != 0:    self.to_do.append([RESOURCE_ACTION, PRINTER_RESOURCE_REQUESTED])
         if scanner != 0:    self.to_do.append([RESOURCE_ACTION, SCANNER_RESOURCE_REQUESTED])
-        if modem != 0:      self.to_do.append([RESOURCE_ACTION, MODEM_RESOURCE_REQUESTED])
-        if driver != 0:     self.to_do.append([RESOURCE_ACTION, SATA_RESOURCE_REQUESTED])
+        if modem != 0:      self.to_do.append([RESOURCE_ACTION, MODEM_RESOURCE_REQUESTED  ])
+        if driver != 0:     self.to_do.append([RESOURCE_ACTION, SATA_RESOURCE_REQUESTED   ])
         if len(archive_op) > 0:
             [self.to_do.append([ARCHIVE_ACTION, archive_op.pop(0)]) for _ in range(len(archive_op))]
             
@@ -85,9 +85,9 @@ class Process():
                     elif task[0] == ARCHIVE_ACTION:
                         op = task[1]
                         if op[1] == CREATE_FILE_REQUEST:
-                            ArchiveM.createfile(self.processID, op[2], op[3])
+                            ArchiveM.createfile(self.processID, op[2], op[3], self.priority)
                         elif op[1] == DELETE_FILE_REQUEST:
-                            ArchiveM.deletefile(self.processID, op[2], self.priority == 0)
+                            ArchiveM.deletefile(self.processID, op[2], self.priority)
                 remaining_time = 1 - diff_time(datetime.now(), start)
             
             # End of an instruction
