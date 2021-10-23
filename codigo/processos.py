@@ -2,11 +2,9 @@
 # Author: Alexandre Kaihara and Pedro
 
 
-from typing import Tuple
 from variaveisglobais import *
 from arquivo import ArchiveManager
 from datetime import datetime
-from time import sleep
 from random import randint
 
 '''

@@ -2,7 +2,6 @@
 # Author: Alexandre Kaihara and Pedro
 
 from threading import Semaphore
-from types import prepare_class
 from time import sleep
 from random import randint, seed
  
