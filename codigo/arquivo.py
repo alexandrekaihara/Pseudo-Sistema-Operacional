@@ -1,5 +1,5 @@
 # Brief: Contains all implementation and rules related to creating and deleting files
-# Author: Alexandre Kaihara and Pedro
+# Author: Davi Dupin
 
 from variaveisglobais import *
 
@@ -26,6 +26,7 @@ class ArchiveManager():
     # Return: 
     #   Returns integer which is a code if the file succeded of failed. If succeed on creating, return CREATE_FILE_SUCESS
     def createfile(self, processID: int, filename: str, filesize: int, priority: int) -> int:
+        filesize = int(filesize)
         print("** Process", processID, " creating a file named", filename, "\n")
         # Check if the file name and user already exists
         keys = self.existing_files.keys()

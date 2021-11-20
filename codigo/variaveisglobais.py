@@ -1,6 +1,5 @@
 # Brief: Contains all constants used on all programs
-# Author: Alexandre Kaihara and Pedro
-
+# Author: Alexandre Kaihara, Pedro, Higor Santos and Davi Dupin
 
 # other
 PROCESS_DO_NOT_EXISTS = -100                          # WHEN ANY OPERATION ON SYSTEM COULD NOT BE COMPLETED BECAUSE GIVEN PROCESS ID DOES NOT EXIST

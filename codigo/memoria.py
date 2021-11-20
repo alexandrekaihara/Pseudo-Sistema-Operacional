@@ -1,5 +1,5 @@
 # Brief: Contains all implementation and rules related to creating and deleting files
-# Author: Alexandre Kaihara and Pedro
+# Author: Pedro Luiz
 
 
 from variaveisglobais import *

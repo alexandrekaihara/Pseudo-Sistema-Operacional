@@ -1,5 +1,5 @@
 # Brief: Define the usage of the resources
-# Author: Alexandre Kaihara and Pedro
+# Author: Davi Dupin
 
 from threading import Semaphore
 from time import sleep

@@ -1,5 +1,5 @@
 # Brief: Pseudo-SO program 
-# Author: Alexandre Kaihara and Pedro
+# Author: Alexandre Kaihara
 
 from variaveisglobais import *
 from arquivo import ArchiveManager

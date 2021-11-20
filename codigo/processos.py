@@ -1,5 +1,5 @@
 # Brief: Define the structure and data of the processes
-# Author: Alexandre Kaihara and Pedro
+# Author: Higor Santos
 
 
 from variaveisglobais import *

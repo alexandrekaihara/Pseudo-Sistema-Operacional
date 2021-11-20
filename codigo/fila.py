@@ -1,5 +1,5 @@
 # Brief: Define the structure of the queue of processes and the logic that defines the next process to be executed
-# Author: Alexandre Kaihara and Pedro
+# Author: Pedro Luiz
 
 from variaveisglobais import *
 

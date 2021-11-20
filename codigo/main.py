@@ -1,5 +1,5 @@
 # Brief: Mainscript which starts the pseudo SO 
-# Author: Alexandre Kaihara and Pedro
+# Author: Alexandre Kaihara, Pedro, Higor Santos and Davi Dupin
 # cd C:\Users\Kaihara\Desktop\FSO-PSEUDO-SO\codigo
 # python main.py input/test/processes.txt input/test/files.txt
 # python main.py input/aging/processes.txt input/aging/files.txt
