@@ -50,10 +50,11 @@ class MemoryManager():
         i: int = 0
         count = 0
         unsorted_free = {}
+        # Percorre memória de forma a conferir sequencias de falses de forma a identificar espaços vazios
         while(i < len(self.memory)):
             if (self.memory[i] == True):
                 if(count > 0):
-                    unsorted_free[i - count] = count
+                    unsorted_free[i - count] = count # é sahvo em um hash em que {endereço: tamanho}
                 count = 0
             else:
                 count+=1 
@@ -62,12 +63,12 @@ class MemoryManager():
         if(count > 0):
             unsorted_free[i - count] = count
                 
-        free = sorted(unsorted_free.items(), key = lambda kv:(kv[1], kv[0]))
+        free = sorted(unsorted_free.items(), key = lambda kv:(kv[1], kv[0])) # Ordena lista de espaços vazios em ordem crescente de tamanho
 
         for key,val in free:
-            if(val >= size ):
+            if(val >= size ): # Seleciona o menor tamanho livre possível que caiba o processo
                 offset[0] = key
-                self.__alocate(size,offset[0])
+                self.__alocate(size,offset[0]) 
                 return MEMORY_ALLOCATION_SUCESS
 
         return NOT_ENOUGH_RAM_MEMORY
