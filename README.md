@@ -5,7 +5,7 @@ A linguagem utilizada para esse trabalho foi Python. No trabalho foram utilizada
 ## Arquitetura
 sistema foi subdividido em seis grandes módulos, sendo: Módulos de fila, processos, arquivos, memória e recurso, implementados de modo independente e  integrados pelo último módulo chamado de PseudoOS, responsável por implementar toda a lógica de controle e interação entre todos os módulos.
 
-##! 1. Módulo de arquivos
+### 1. Módulo de arquivos
 O módulo de arquivos é responsável por representar o Sistema de Arquivos do nosso pseudo-SO. Aqui realizamos todo o gerenciamento de arquivos no que tange à criação e à exclusão destes. A estratégia utilizada para realizar essas operações segue todos os princípios pré-estabelecidos pela especificação do trabalho, isto é: há persistência dos dados em disco; a alocação é contígua; o algoritmo de alocação do disco é o first-fit; processos de tempo real podem criar e deletar qualquer arquivo; e processos comuns possuem a limitação de deletar apenas arquivos criados por eles. 
 
 ### 2. Módulo de filas
