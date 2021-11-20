@@ -1,4 +1,5 @@
 # Pseudo Sistema Operacional - PseudoOS
+# Descrição 
 O objetivo desse trabalho é aplicar os conhecimentos adquiridos na disciplina de Sistemas Operacionais através da implementação de um Pseudo Sistema Operacional, simulando as várias funções desempenhada pelo sistema operacional. Adicionalmente, iremos trabalhar conceitos aprendidos de Egenharia de Software para a modularização e boas práticas de programação.
 
 # Ferramentas e Linguagens utilizadas
